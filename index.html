@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#FFF6E7">
+<title>CardTales · 卡片英语</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23FF7A3D'/%3E%3Cpath d='M26 32h20v40H26z' fill='%23FFF6E7'/%3E%3Cpath d='M54 32h20v40H54z' fill='%23FFC93C'/%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --cream:#FFF6E7; --paper:#FFFDF8; --ink:#23252E; --muted:#70748A;
+  --orange:#FF7A3D; --yellow:#FFC93C; --teal:#19B39B; --blue:#3E7BFA; --pink:#FF7EB6;
+  --line:3px solid var(--ink);
+  --shadow:0 5px 0 var(--ink);
+  --shadow-sm:0 3px 0 var(--ink);
+  --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+  --fun:"Comic Sans MS","Chalkboard SE","Segoe UI",var(--sans);
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);
+  overscroll-behavior-y:none;line-height:1.65;
+  background-image:radial-gradient(circle at 12% 8%,rgba(255,201,60,.30),transparent 42%),
+                   radial-gradient(circle at 88% 0%,rgba(62,123,250,.14),transparent 40%),
+                   radial-gradient(circle at 50% 100%,rgba(25,179,155,.12),transparent 45%);
+  background-attachment:fixed;
+}
+body.locked{overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+h1,h2,h3,p{margin:0}
+.wrap{max-width:1120px;margin:0 auto;padding:0 18px 120px}
+
+/* ============ 顶栏 ============ */
+.topbar{display:none}
+@media(min-width:900px){
+  .topbar{display:flex;align-items:center;justify-content:space-between;max-width:1120px;margin:0 auto;padding:22px 18px 6px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:.2px}
+  .brand .logo{width:38px;height:38px;border-radius:12px;background:var(--orange);border:var(--line);display:grid;place-items:center;font-size:19px;box-shadow:var(--shadow-sm);transform:rotate(-6deg)}
+  .tabs-desktop{display:flex;gap:8px;background:#fff;border:var(--line);border-radius:999px;padding:5px;box-shadow:var(--shadow-sm)}
+  .tabs-desktop button{padding:7px 20px;border-radius:999px;font-weight:700;font-size:15px;color:var(--muted);transition:.2s}
+  .tabs-desktop button.on{background:var(--ink);color:#fff}
+}
+
+/* ============ 视图 ============ */
+.view{display:none;animation:fade .38s ease both}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ============ 首页 ============ */
+.hero{padding:26px 0 4px}
+.hero h1{font-size:clamp(30px,7.2vw,50px);line-height:1.18;font-weight:900;letter-spacing:-.5px}
+.hero h1 em{font-style:normal;color:var(--orange);position:relative;display:inline-block}
+.hero h1 em::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:12px;background:var(--yellow);opacity:.55;border-radius:6px;z-index:-1}
+.hero p{margin-top:12px;color:#4C5060;font-size:15px;max-width:34em}
+
+.panel{background:var(--paper);border:var(--line);border-radius:26px;box-shadow:var(--shadow);padding:16px}
+.composer{margin-top:22px}
+#srcText{
+  width:100%;min-height:112px;resize:vertical;border:2.5px dashed #D9D2C2;border-radius:18px;
+  background:#FFFCF6;padding:14px 15px;font-family:var(--sans);font-size:15px;line-height:1.7;color:var(--ink);outline:none;transition:.2s
+}
+#srcText::placeholder{color:#A9A493}
+#srcText:focus{border-color:var(--orange);background:#fff;box-shadow:0 0 0 5px rgba(255,122,61,.12)}
+.composer-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.attach{display:flex;gap:8px;flex-wrap:wrap}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;
+  border:2.5px solid var(--ink);background:#fff;font-size:13.5px;font-weight:700;
+  box-shadow:0 3px 0 var(--ink);transition:transform .12s,box-shadow .12s
+}
+.chip:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+.chip.on{background:var(--yellow)}
+.btn-primary{
+  margin-left:auto;display:inline-flex;align-items:center;gap:8px;
+  padding:12px 24px;border-radius:999px;border:var(--line);background:var(--orange);color:#fff;
+  font-size:16px;font-weight:900;letter-spacing:.3px;box-shadow:0 5px 0 var(--ink);transition:transform .12s,box-shadow .12s
+}
+.btn-primary:active{transform:translateY(5px);box-shadow:0 0 0 var(--ink)}
+.btn-primary:disabled{opacity:.6;pointer-events:none}
+.hint{margin-top:10px;font-size:12.5px;color:var(--muted);min-height:18px}
+
+.sub{margin:34px 0 12px;font-size:17px;font-weight:900;display:flex;align-items:center;gap:8px}
+.sub small{font-weight:600;font-size:12.5px;color:var(--muted)}
+
+.sample-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;margin:0 -2px}
+.sample-grid::-webkit-scrollbar{height:0}
+.sample-card{
+  flex:0 0 236px;scroll-snap-align:start;text-align:left;
+  background:var(--paper);border:var(--line);border-radius:22px;padding:12px;box-shadow:var(--shadow);
+  transition:transform .16s,box-shadow .16s;position:relative;overflow:hidden
+}
+.sample-card:hover{transform:translateY(-3px);box-shadow:0 8px 0 var(--ink)}
+.sample-card:active{transform:translateY(4px);box-shadow:0 0 0 var(--ink)}
+.sample-card .cover{
+  height:82px;border-radius:16px;border:2.5px solid var(--ink);display:grid;place-items:center;
+  font-size:38px;margin-bottom:10px;overflow:hidden;position:relative
+}
+.sample-card h3{font-size:15.5px;font-weight:900;line-height:1.35}
+.sample-card .zh{font-size:12.5px;color:var(--muted);margin-top:1px}
+.sample-card .meta{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px;border:2px solid var(--ink);background:#fff}
+
+/* 三步说明 */
+.howto{display:grid;gap:10px;margin-top:16px}
+.step{display:flex;align-items:center;gap:11px;padding:12px 14px;border:2.5px dashed #D8D0BE;border-radius:18px;background:rgba(255,255,255,.55)}
+.step .n{font-size:20px;font-weight:900;color:var(--orange)}
+.step b{display:block;font-size:13.5px}
+.step small{display:block;font-size:11.5px;color:var(--muted);line-height:1.5}
+
+/* ============ 记录 ============ */
+.rec-title{padding:26px 0 4px}
+.rec-title h2{font-size:clamp(24px,5.6vw,34px);font-weight:900}
+.rec-title p{color:var(--muted);font-size:14px;margin-top:6px}
+.rec-list{margin-top:20px;display:grid;gap:12px}
+@media(min-width:760px){.rec-list{grid-template-columns:1fr 1fr}}
+.rec-item{
+  display:flex;gap:12px;align-items:center;text-align:left;width:100%;
+  background:var(--paper);border:var(--line);border-radius:20px;padding:12px;box-shadow:var(--shadow-sm);
+  transition:transform .14s,box-shadow .14s
+}
+.rec-item:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--ink)}
+.rec-item:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+.rec-emoji{width:54px;height:54px;flex:0 0 54px;border-radius:16px;border:2.5px solid var(--ink);display:grid;place-items:center;font-size:26px}
+.rec-body{min-width:0;flex:1}
+.rec-body h4{font-size:14.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-body .m{font-size:12px;color:var(--muted);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.empty{
+  text-align:center;padding:52px 18px;border:3px dashed #DCD5C5;border-radius:24px;color:var(--muted);background:rgba(255,255,255,.5)
+}
+.empty .e{font-size:42px;display:block;margin-bottom:10px}
+
+/* ============ 底部 tabbar ============ */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;
+  background:rgba(255,253,248,.94);backdrop-filter:blur(12px);
+  border-top:var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom));
+}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;color:var(--muted);font-size:11.5px;font-weight:800}
+.tabbar button .ic{font-size:21px;line-height:1;filter:grayscale(1);opacity:.55;transition:.2s}
+.tabbar button.on{color:var(--ink)}
+.tabbar button.on .ic{filter:none;opacity:1;transform:translateY(-2px) scale(1.1)}
+@media(min-width:900px){.tabbar{display:none}}
+
+/* ============ 学习页 ============ */
+#view-learn{
+  position:fixed;inset:0;z-index:40;background:var(--cream);display:none;flex-direction:column;overflow:hidden;
+  padding:calc(8px + env(safe-area-inset-top)) 18px calc(10px + env(safe-area-inset-bottom));
+  background-image:radial-gradient(circle at 10% 0%,rgba(255,201,60,.28),transparent 40%),
+                   radial-gradient(circle at 92% 12%,rgba(255,126,182,.18),transparent 38%)
+}
+#view-learn.open{display:flex;animation:slideUp .42s cubic-bezier(.2,.9,.3,1) both}
+@keyframes slideUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.learn-head{display:flex;align-items:center;gap:10px;max-width:1000px;width:100%;margin:0 auto;flex:0 0 auto}
+.icon-btn{
+  width:42px;height:42px;flex:0 0 42px;border-radius:14px;border:2.5px solid var(--ink);background:#fff;
+  display:grid;place-items:center;font-size:17px;box-shadow:0 3px 0 var(--ink);transition:.12s
+}
+.icon-btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+.learn-head .tt{flex:1;min-width:0}
+.learn-head .tt h3{font-size:15.5px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.learn-head .tt p{font-size:11.5px;color:var(--muted)}
+.counter{font-weight:900;font-size:14px;font-variant-numeric:tabular-nums;background:#fff;border:2.5px solid var(--ink);border-radius:999px;padding:3px 12px;box-shadow:0 3px 0 var(--ink)}
+
+.stage{
+  position:relative;flex:1 1 0;width:100%;max-width:430px;margin:8px auto 0;
+  display:grid;place-items:center;min-height:0
+}
+.stage-inner{position:relative;width:100%;aspect-ratio:2/3}
+
+.card{
+  position:absolute;inset:0;border-radius:26px;border:3.5px solid var(--ink);overflow:hidden;
+  background:#fff;box-shadow:0 10px 0 rgba(35,37,46,.9);
+  opacity:0;transform:scale(.93) translateY(14px);pointer-events:none;
+  transition:opacity .4s ease,transform .45s cubic-bezier(.2,.9,.3,1.15)
+}
+.card.on{opacity:1;transform:none;pointer-events:auto}
+.card svg.art{position:absolute;inset:0;width:100%;height:100%;display:block}
+.actors{
+  position:absolute;left:0;right:0;top:16%;height:42%;display:flex;align-items:center;justify-content:center;gap:2%;
+  font-size:clamp(56px,19vw,104px);line-height:1;filter:drop-shadow(0 6px 0 rgba(0,0,0,.10))
+}
+.actors span{display:inline-block;animation:bob 2.6s ease-in-out infinite}
+.actors span:nth-child(2){animation-delay:.35s}
+.actors span:nth-child(3){animation-delay:.7s}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2deg)}}
+.card-no{
+  position:absolute;top:12px;left:12px;font-size:12px;font-weight:900;letter-spacing:.5px;
+  background:#fff;border:2.5px solid var(--ink);border-radius:999px;padding:1px 10px;box-shadow:0 2px 0 var(--ink)
+}
+.bubble{
+  position:absolute;left:12px;right:12px;bottom:12px;background:#fff;border:3px solid var(--ink);border-radius:20px;
+  padding:13px 15px 12px;box-shadow:0 5px 0 rgba(35,37,46,.92)
+}
+.bubble::before{
+  content:"";position:absolute;top:-11px;left:30px;width:18px;height:18px;background:#fff;
+  border-left:3px solid var(--ink);border-top:3px solid var(--ink);transform:rotate(45deg);border-radius:3px 0 0 0
+}
+.bubble p{font-family:var(--fun);font-size:clamp(16px,4.3vw,21px);line-height:1.42;font-weight:700;letter-spacing:.2px;word-break:break-word}
+.bubble mark{background:linear-gradient(180deg,transparent 56%,var(--yellow) 56%);color:inherit;padding:0 1px;font-weight:900}
+.bubble .cn{margin-top:7px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.kw{
+  display:inline-flex;align-items:center;gap:5px;margin-top:9px;font-size:12px;font-weight:900;
+  border:2px solid var(--ink);border-radius:999px;padding:1px 10px 1px 7px;background:#FFF3D6
+}
+.kw b{font-family:var(--fun);letter-spacing:.3px}
+
+/* ============ 控制条 ============ */
+.controls{max-width:430px;width:100%;margin:10px auto 0;flex:0 0 auto}
+.scrub{
+  position:relative;height:22px;display:flex;align-items:center;cursor:pointer;touch-action:none;user-select:none
+}
+.scrub-track{position:relative;width:100%;height:9px;background:#E7DFCE;border:2.5px solid var(--ink);border-radius:999px;overflow:hidden}
+.scrub-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--orange);border-right:2px solid var(--ink)}
+.scrub-knob{
+  position:absolute;top:50%;left:0;width:19px;height:19px;margin-left:-9px;transform:translateY(-50%);
+  background:#fff;border:3px solid var(--ink);border-radius:50%;box-shadow:0 2px 0 var(--ink);transition:transform .12s
+}
+.scrub.grab .scrub-knob{transform:translateY(-50%) scale(1.22)}
+.ctrl-row{display:flex;align-items:center;justify-content:center;gap:11px;margin-top:2px}
+.ctrl-btn{
+  width:48px;height:48px;border-radius:50%;border:2.5px solid var(--ink);background:#fff;display:grid;place-items:center;
+  font-size:18px;box-shadow:0 4px 0 var(--ink);transition:transform .12s,box-shadow .12s,background .2s
+}
+.ctrl-btn:active{transform:translateY(4px);box-shadow:0 0 0 var(--ink)}
+.ctrl-btn.play{
+  width:60px;height:60px;background:var(--orange);color:#fff;font-size:22px;box-shadow:0 5px 0 var(--ink)
+}
+.ctrl-btn.small{background:#fff;font-size:15px;width:40px;height:40px}
+.ctrl-btn.off{background:#EFEADF;color:#B3AD9E}
+.timeline{text-align:center;font-size:11px;color:var(--muted);margin-top:1px;font-variant-numeric:tabular-nums}
+
+/* 完成态 */
+.finish{
+  position:absolute;inset:0;border-radius:26px;border:3.5px solid var(--ink);background:#FFF9EC;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:26px;
+  box-shadow:0 10px 0 rgba(35,37,46,.9);z-index:5
+}
+.finish.on{display:flex;animation:pop .4s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+.finish .big{font-size:58px;animation:bob 2s ease-in-out infinite}
+.finish h3{font-size:21px;font-weight:900}
+.finish p{font-size:13.5px;color:var(--muted);max-width:20em}
+.finish .row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:center}
+
+/* ============ 遮罩 / 弹窗 / toast ============ */
+.loading{
+  position:fixed;inset:0;z-index:80;background:rgba(255,246,231,.92);backdrop-filter:blur(6px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px
+}
+.loading.on{display:flex}
+.loading .strip{display:flex;gap:10px;font-size:30px}
+.loading .strip span{animation:hop .9s ease-in-out infinite}
+.loading .strip span:nth-child(2){animation-delay:.15s}
+.loading .strip span:nth-child(3){animation-delay:.3s}
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.loading p{font-size:14px;font-weight:800}
+.loading small{font-size:12px;color:var(--muted)}
+
+.modal{position:fixed;inset:0;z-index:70;background:rgba(35,37,46,.42);display:none;align-items:center;justify-content:center;padding:20px}
+.modal.on{display:flex;animation:fade .2s both}
+.dialog{width:100%;max-width:420px;background:var(--paper);border:var(--line);border-radius:24px;padding:18px;box-shadow:0 8px 0 var(--ink)}
+.dialog h3{font-size:17px;font-weight:900;margin-bottom:4px}
+.dialog p{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+.dialog input{
+  width:100%;border:2.5px solid var(--ink);border-radius:14px;padding:11px 13px;font-size:14px;outline:none;background:#fff;font-family:var(--sans)
+}
+.dialog .row{display:flex;gap:10px;margin-top:14px}
+.dialog .row button{flex:1;padding:11px;border-radius:999px;border:2.5px solid var(--ink);font-weight:900;font-size:14px;box-shadow:0 3px 0 var(--ink)}
+.dialog .row .ghost{background:#fff}
+.dialog .row .go{background:var(--orange);color:#fff}
+
+#toast{
+  position:fixed;left:50%;bottom:96px;transform:translate(-50%,20px);z-index:90;opacity:0;pointer-events:none;
+  background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:10px 18px;border-radius:999px;
+  transition:.25s;max-width:86vw;text-align:center
+}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ============ 桌面布局 ============ */
+@media(min-width:900px){
+  #view-home.active{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-content:start}
+  .hero{grid-column:1;grid-row:1;padding-top:18px}
+  .composer{grid-column:1;grid-row:2;margin-top:18px}
+  .samples{grid-column:2;grid-row:1 / span 2;margin-top:0;padding-top:22px}
+  .sample-grid{flex-direction:column;overflow:visible;scroll-snap-type:none}
+  .sample-card{flex:1 1 auto;display:flex;gap:12px;align-items:center;padding:11px}
+  .sample-card .cover{margin:0;flex:0 0 74px;width:74px;height:74px;font-size:32px}
+  .sample-card .sc-body{min-width:0}
+  .howto{grid-column:1 / -1;grid-row:3;grid-template-columns:repeat(3,1fr);margin-top:26px;gap:14px}
+  .step{padding:14px 16px}
+  #view-records .rec-list{margin-top:22px}
+  .stage{max-width:720px}
+  .stage-inner{aspect-ratio:4/3}
+  .controls{max-width:720px}
+  .actors{font-size:64px;top:16%;height:40%}
+  .bubble p{font-size:21px}
+}
+@media(min-width:1200px){
+  .hero h1{font-size:48px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="logo">📚</span> CardTales <span style="font-weight:600;font-size:13px;color:var(--muted)">卡片英语</span></div>
+  <nav class="tabs-desktop">
+    <button data-tab="home" class="on">首页</button>
+    <button data-tab="records">记录</button>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <!-- ================= 首页 ================= -->
+  <main class="view active" id="view-home">
+    <section class="hero">
+      <h1>把任何内容<br>变成<em>会说话的卡片</em></h1>
+      <p>贴一段文字、传一份 PDF、一张图片，或者丢个网页链接——几秒后，它变成一组卡通英语卡片，一张张自动播放，边看边听。</p>
+    </section>
+
+    <section class="composer panel">
+      <textarea id="srcText" placeholder="在这里粘贴一段内容…&#10;例如：Three little pigs build their own houses. The first pig makes a house of straw…"></textarea>
+      <div class="composer-row">
+        <div class="attach">
+          <button class="chip" data-act="pdf">📄 PDF</button>
+          <button class="chip" data-act="img">🖼 图片</button>
+          <button class="chip" data-act="url">🔗 链接</button>
+        </div>
+        <button class="btn-primary" id="btnGen">生成卡片 ✨</button>
+      </div>
+      <p class="hint" id="srcHint">支持中英文混合，英文效果最好</p>
+    </section>
+
+    <section class="samples">
+      <div class="sub">先试试这 3 个 <small>点击直接看卡片</small></div>
+      <div class="sample-grid" id="sampleGrid"></div>
+    </section>
+
+    <section class="howto">
+      <div class="step"><span class="n">①</span><div><b>丢进内容</b><small>一段文字、PDF、图片或网页链接</small></div></div>
+      <div class="step"><span class="n">②</span><div><b>自动拆卡</b><small>分句、挑关键词、缩短成一句</small></div></div>
+      <div class="step"><span class="n">③</span><div><b>播着看</b><small>自动逐张播放，可暂停、拖进度</small></div></div>
+    </section>
+  </main>
+
+  <!-- ================= 记录 ================= -->
+  <main class="view" id="view-records">
+    <section class="rec-title">
+      <h2>学习记录</h2>
+      <p id="recSub">每一次生成的卡片都留在这里</p>
+    </section>
+    <div class="rec-list" id="recList"></div>
+  </main>
+
+</div>
+
+<!-- ================= 学习页 ================= -->
+<section id="view-learn">
+  <div class="learn-head">
+    <button class="icon-btn" id="btnBack">←</button>
+    <div class="tt"><h3 id="learnTitle">—</h3><p id="learnSub">—</p></div>
+    <span class="counter" id="learnCount">1 / 6</span>
+  </div>
+
+  <div class="stage">
+    <div class="stage-inner" id="stageInner">
+      <div class="finish" id="finish">
+        <div class="big">🎉</div>
+        <h3>学完啦！</h3>
+        <p id="finishTxt">这一组卡片都看完啦，要不要再来一遍？</p>
+        <div class="row">
+          <button class="chip" id="btnAgain">🔁 再来一遍</button>
+          <button class="chip" id="btnHome2">🏠 回首页</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="scrub" id="scrub">
+      <div class="scrub-track"><div class="scrub-fill" id="scrubFill"></div></div>
+      <div class="scrub-knob" id="scrubKnob"></div>
+    </div>
+    <div class="timeline" id="timeline">0:00 / 0:00</div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn small" id="btnPrev" title="上一张">‹</button>
+      <button class="ctrl-btn small" id="btnVoice" title="朗读开关">🔊</button>
+      <button class="ctrl-btn play" id="btnPlay">▶</button>
+      <button class="ctrl-btn small" id="btnSpeed" title="播放速度">1×</button>
+      <button class="ctrl-btn small" id="btnNext" title="下一张">›</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= tabbar ================= -->
+<nav class="tabbar">
+  <button data-tab="home" class="on"><span class="ic">🏠</span>首页</button>
+  <button data-tab="records"><span class="ic">📒</span>记录</button>
+</nav>
+
+<!-- ================= 遮罩 ================= -->
+<div class="loading" id="loading">
+  <div class="strip"><span>📕</span><span>✂️</span><span>🎨</span></div>
+  <p id="loadTxt">正在读内容…</p>
+  <small id="loadSub">马上就好</small>
+</div>
+
+<div class="modal" id="modal">
+  <div class="dialog">
+    <h3>打开一个网页</h3>
+    <p>粘贴链接，我会抓取正文做成卡片</p>
+    <input id="urlInput" type="url" placeholder="https://example.com/story" autocomplete="off">
+    <div class="row">
+      <button class="ghost" id="modalCancel">取消</button>
+      <button class="go" id="modalOk">读取</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="filePdf" accept="application/pdf,.pdf" hidden>
+<input type="file" id="fileImg" accept="image/*" hidden>
+
+<div id="toast"></div>
+
+<script>
+/* =========================================================
+   CardTales · 卡片英语
+   单文件 H5：内容抽取 → 分句打分 → 关键词 → 卡通卡片 → 自动播放
+   ========================================================= */
+(function(){
+'use strict';
+
+const $  = s => document.querySelector(s);
+const KEY = 'cardtales.records.v1';
+
+/* ---------------- 工具 ---------------- */
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rnd = n => Math.floor(Math.random()*n);
+
+let toastTimer = 0;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('on'), 2200);
+}
+
+/* ---------------- 停用词 ---------------- */
+const STOP = new Set(('a an the and or but if so of to in on at by for with from as is are was were be been being am '+
+'do does did have has had not no yes it its this that these those there here i you he she we they my your his her our '+
+'their me him us them what which who whom how when where why can could will would shall should may might must very too '+
+'just also then than now about into over under out up down more most some any all each other such only own same '+
+'again back still even ever never much many few lot get got go goes went come came make made take took said say '+
+'one two three first second next last').split(' '));
+
+const WORD_EMOJI = {
+  pig:'🐷', wolf:'🐺', dog:'🐶', cat:'🐱', bird:'🐦', fish:'🐟', bear:'🐻', fox:'🦊', rabbit:'🐰',
+  lion:'🦁', tiger:'🐯', monkey:'🐵', elephant:'🐘', mouse:'🐭', frog:'🐸', duck:'🦆', cow:'🐮',
+  house:'🏠', home:'🏠', door:'🚪', room:'🛏', garden:'🌷', window:'🪟', roof:'🏘',
+  straw:'🌾', wood:'🪵', brick:'🧱', stone:'🪨', tree:'🌳', forest:'🌲', flower:'🌸', grass:'🌿',
+  sun:'☀️', moon:'🌙', star:'⭐', stars:'✨', sky:'🌌', cloud:'☁️', rain:'🌧', snow:'❄️',
+  wind:'💨', sea:'🌊', water:'💧', ocean:'🌊', river:'🏞', beach:'🏖', mountain:'⛰', earth:'🌍',
+  planet:'🪐', planets:'🪐', space:'🚀', rocket:'🚀', mars:'🔴', world:'🌏',
+  school:'🏫', teacher:'🧑‍🏫', class:'📚', book:'📖', bag:'🎒', pencil:'✏️', homework:'📝',
+  bread:'🍞', milk:'🥛', egg:'🥚', apple:'🍎', cake:'🍰', rice:'🍚', noodle:'🍜', water:'💧',
+  breakfast:'🍳', lunch:'🍱', dinner:'🍽', food:'🍽', eat:'😋', drink:'🥤', banana:'🍌',
+  car:'🚗', bus:'🚌', bike:'🚲', train:'🚆', plane:'✈️', ship:'🚢', road:'🛣', city:'🏙',
+  street:'🛣', shop:'🏪', park:'🌳', zoo:'🦁', farm:'🚜', market:'🛒',
+  mum:'👩', mom:'👩', mother:'👩', dad:'👨', father:'👨', family:'👨‍👩‍👧', friend:'🧑‍🤝‍🧑',
+  baby:'👶', boy:'👦', girl:'👧', people:'👨‍👩‍👧', king:'👑', queen:'👑',
+  happy:'😄', sad:'😢', angry:'😠', laugh:'😆', smile:'🙂', cry:'😭', afraid:'😨', tired:'😴',
+  run:'🏃', jump:'🤸', walk:'🚶', swim:'🏊', play:'⚽', sing:'🎤', dance:'💃', read:'📖',
+  write:'✏️', draw:'🎨', sleep:'😴', wake:'⏰', brush:'🪥', wash:'🧼', clean:'🧹',
+  shoes:'👟', hat:'👒', coat:'🧥', clock:'🕐', time:'⏰', morning:'🌅', night:'🌙', day:'☀️',
+  big:'🔵', small:'🔹', hot:'🔥', cold:'🧊', fast:'⚡', slow:'🐢', strong:'💪', safe:'🛡',
+  red:'🔴', blue:'🔵', green:'🟢', yellow:'🟡', black:'⚫', white:'⚪',
+  money:'💰', gold:'🪙', key:'🔑', box:'📦', gift:'🎁', balloon:'🎈', toy:'🧸', music:'🎵'
+};
+const FALLBACK_EMOJI = {
+  meadow:['🌿','🌞'], night:['🌙','✨'], sea:['🌊','🐠'], space:['🚀','⭐'],
+  house:['🏠','🌳'], forest:['🌲','🍃'], kitchen:['🍽','🥛'], city:['🏙','🚌'],
+  school:['🏫','📚'], rain:['☁️','🌧']
+};
+const TOPIC_SCENE = [
+  [/space|planet|star|moon|sun|mars|rocket|universe/i, 'space'],
+  [/sea|ocean|water|fish|beach|ship|wave/i, 'sea'],
+  [/night|dark|sleep|dream|星/i, 'night'],
+  [/rain|snow|cloud|storm|wet|umbrella/i, 'rain'],
+  [/school|teacher|class|homework|student/i, 'school'],
+  [/forest|tree|wood|wolf|bear|leaf/i, 'forest'],
+  [/breakfast|lunch|dinner|eat|food|milk|bread|cake/i, 'kitchen'],
+  [/city|street|bus|car|shop|market|road/i, 'city'],
+  [/house|home|door|room|family/i, 'house']
+];
+
+/* ---------------- 卡通场景（纯 SVG，扁平上色） ---------------- */
+function sceneSVG(id){
+  const bg = {
+    meadow:`<rect width="400" height="240" fill="#CDEFFF"/>
+      <circle cx="298" cy="48" r="24" fill="#FFD84D"/>
+      <ellipse cx="96" cy="56" rx="34" ry="15" fill="#fff" opacity=".95"/>
+      <ellipse cx="126" cy="50" rx="24" ry="12" fill="#fff" opacity=".95"/>
+      <ellipse cx="70" cy="174" rx="150" ry="76" fill="#8FD873"/>
+      <ellipse cx="332" cy="206" rx="170" ry="82" fill="#6BC45C"/>
+      <rect y="228" width="400" height="12" fill="#5AAF4E"/>`,
+    night:`<rect width="400" height="240" fill="#232B57"/>
+      <circle cx="70" cy="40" r="2.6" fill="#FFE9A8"/><circle cx="140" cy="70" r="2" fill="#FFE9A8"/>
+      <circle cx="230" cy="34" r="2.4" fill="#FFE9A8"/><circle cx="330" cy="86" r="2" fill="#FFE9A8"/>
+      <circle cx="180" cy="112" r="1.8" fill="#FFE9A8"/><circle cx="300" cy="30" r="1.8" fill="#FFE9A8"/>
+      <circle cx="318" cy="62" r="26" fill="#FFE9A8"/>
+      <circle cx="308" cy="54" r="24" fill="#232B57"/>
+      <ellipse cx="200" cy="232" rx="230" ry="60" fill="#303C74"/>`,
+    sea:`<rect width="400" height="240" fill="#D6F1FF"/>
+      <rect y="78" width="400" height="88" fill="#7FD5F2"/>
+      <path d="M0 96 Q40 82 80 96 T160 96 T240 96 T320 96 T400 96 V124 H0Z" fill="#4FBEE6"/>
+      <path d="M0 128 Q40 114 80 128 T160 128 T240 128 T320 128 T400 128 V158 H0Z" fill="#38A9D6"/>
+      <rect y="158" width="400" height="82" fill="#FFE1A8"/>
+      <ellipse cx="92" cy="196" rx="46" ry="10" fill="#FFEFCD"/>
+      <ellipse cx="300" cy="212" rx="38" ry="9" fill="#FFEFCD"/>`,
+    space:`<rect width="400" height="240" fill="#131A3A"/>
+      <circle cx="60" cy="44" r="2.4" fill="#fff"/><circle cx="118" cy="90" r="1.8" fill="#fff"/>
+      <circle cx="200" cy="36" r="2" fill="#fff"/><circle cx="86" cy="150" r="1.6" fill="#fff"/>
+      <circle cx="352" cy="150" r="2" fill="#fff"/><circle cx="250" cy="170" r="1.6" fill="#fff"/>
+      <circle cx="308" cy="62" r="28" fill="#FF8FB1"/>
+      <ellipse cx="308" cy="62" rx="52" ry="12" fill="none" stroke="#FFD1E0" stroke-width="4" opacity=".8"/>
+`,
+    house:`<rect width="400" height="240" fill="#FFEBCB"/>
+      <circle cx="296" cy="50" r="22" fill="#FFD84D"/>
+      <rect x="126" y="126" width="148" height="94" fill="#FFB37A" stroke="#23252E" stroke-width="3"/>
+      <polygon points="112,126 200,60 288,126" fill="#E8694A" stroke="#23252E" stroke-width="3"/>
+      <rect x="152" y="150" width="40" height="34" fill="#A8E0FF" stroke="#23252E" stroke-width="3"/>
+      <rect x="208" y="160" width="42" height="60" fill="#8B5E3C" stroke="#23252E" stroke-width="3"/>
+      <circle cx="242" cy="192" r="3" fill="#FFD84D"/>
+      <ellipse cx="200" cy="236" rx="210" ry="34" fill="#A8D98C"/>`,
+    forest:`<rect width="400" height="240" fill="#DCF3D4"/>
+      <polygon points="70,180 110,80 150,180" fill="#3F9B54"/>
+      <rect x="105" y="176" width="12" height="34" fill="#8B5E3C"/>
+      <polygon points="170,190 220,66 270,190" fill="#4CAF5E"/>
+      <rect x="214" y="186" width="12" height="36" fill="#8B5E3C"/>
+      <polygon points="280,180 320,86 360,180" fill="#3F9B54"/>
+      <rect x="315" y="176" width="12" height="34" fill="#8B5E3C"/>
+      <rect y="208" width="400" height="32" fill="#8ED27A"/>`,
+    kitchen:`<rect width="400" height="240" fill="#FFF1DC"/>
+      <rect y="176" width="400" height="64" fill="#D99A5B"/>
+      <rect y="170" width="400" height="12" fill="#C1854B"/>
+      <ellipse cx="200" cy="170" rx="66" ry="16" fill="#fff" stroke="#23252E" stroke-width="3"/>
+      <circle cx="182" cy="164" r="10" fill="#FFB37A"/>
+      <rect x="204" y="152" width="26" height="18" rx="4" fill="#FFD84D"/>
+      <rect x="52" y="110" width="44" height="60" rx="6" fill="#A8E0FF" stroke="#23252E" stroke-width="3"/>`,
+    city:`<rect width="400" height="240" fill="#DCEBFF"/>
+      <rect x="30" y="88" width="62" height="128" fill="#9BB7E0"/>
+      <rect x="104" y="52" width="74" height="164" fill="#7C9ED0"/>
+      <rect x="190" y="110" width="58" height="106" fill="#9BB7E0"/>
+      <rect x="258" y="70" width="80" height="146" fill="#8AAADB"/>
+      <rect x="348" y="122" width="46" height="94" fill="#9BB7E0"/>
+      <g fill="#FFF3B0"><rect x="44" y="104" width="12" height="12"/><rect x="66" y="104" width="12" height="12"/>
+      <rect x="44" y="128" width="12" height="12"/><rect x="66" y="128" width="12" height="12"/>
+      <rect x="120" y="72" width="14" height="14"/><rect x="148" y="72" width="14" height="14"/>
+      <rect x="120" y="100" width="14" height="14"/><rect x="148" y="100" width="14" height="14"/>
+      <rect x="276" y="92" width="14" height="14"/><rect x="304" y="92" width="14" height="14"/></g>
+      <rect y="216" width="400" height="24" fill="#B7CBE8"/>`,
+    school:`<rect width="400" height="240" fill="#E6F4FF"/>
+      <rect x="92" y="104" width="216" height="116" fill="#F6C86A" stroke="#23252E" stroke-width="3"/>
+      <polygon points="78,104 200,44 322,104" fill="#E8694A" stroke="#23252E" stroke-width="3"/>
+      <rect x="176" y="150" width="48" height="70" fill="#8B5E3C" stroke="#23252E" stroke-width="3"/>
+      <rect x="118" y="132" width="40" height="34" fill="#A8E0FF" stroke="#23252E" stroke-width="3"/>
+      <rect x="242" y="132" width="40" height="34" fill="#A8E0FF" stroke="#23252E" stroke-width="3"/>
+      <rect x="196" y="20" width="4" height="34" fill="#23252E"/>
+      <polygon points="200,22 236,32 200,42" fill="#FF7A3D"/>
+      <rect y="220" width="400" height="20" fill="#A8D98C"/>`,
+    rain:`<rect width="400" height="240" fill="#C6D8E8"/>
+      <ellipse cx="120" cy="70" rx="54" ry="30" fill="#8FA6B8"/>
+      <ellipse cx="166" cy="58" rx="40" ry="26" fill="#8FA6B8"/>
+      <ellipse cx="280" cy="86" rx="46" ry="26" fill="#9FB4C6"/>
+      <g stroke="#5B8FD6" stroke-width="4" stroke-linecap="round">
+      <line x1="96" y1="112" x2="88" y2="134"/><line x1="126" y1="112" x2="118" y2="134"/>
+      <line x1="156" y1="112" x2="148" y2="134"/><line x1="266" y1="126" x2="258" y2="148"/>
+      <line x1="296" y1="126" x2="288" y2="148"/></g>
+      <ellipse cx="200" cy="238" rx="230" ry="42" fill="#A9C7D8"/>`
+  };
+  const SKY = {
+    meadow:'#CDEFFF', night:'#232B57', sea:'#D6F1FF', space:'#131A3A', house:'#FFEBCB',
+    forest:'#DCF3D4', kitchen:'#FFF1DC', city:'#DCEBFF', school:'#E6F4FF', rain:'#C6D8E8'
+  };
+  const DECO = {
+    meadow:`<ellipse cx="92" cy="66" rx="42" ry="17" fill="#fff" opacity=".95"/>
+      <ellipse cx="128" cy="58" rx="28" ry="14" fill="#fff" opacity=".95"/>
+      <ellipse cx="286" cy="112" rx="34" ry="14" fill="#fff" opacity=".8"/>`,
+    night:`<circle cx="60" cy="40" r="2.6" fill="#FFE9A8"/><circle cx="132" cy="86" r="2" fill="#FFE9A8"/>
+      <circle cx="212" cy="36" r="2.4" fill="#FFE9A8"/><circle cx="266" cy="102" r="1.8" fill="#FFE9A8"/>
+      <circle cx="40" cy="118" r="1.8" fill="#FFE9A8"/><circle cx="330" cy="30" r="2" fill="#FFE9A8"/>`,
+    sea:`<path d="M96 62 q8 -8 16 0 q8 -8 16 0" stroke="#8FA9C4" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M210 92 q7 -7 14 0 q7 -7 14 0" stroke="#8FA9C4" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <ellipse cx="150" cy="38" rx="30" ry="13" fill="#fff" opacity=".85"/>`,
+    space:`<circle cx="60" cy="40" r="2.4" fill="#fff"/><circle cx="140" cy="94" r="1.8" fill="#fff"/>
+      <circle cx="238" cy="42" r="2" fill="#fff"/><circle cx="318" cy="108" r="1.6" fill="#fff"/>
+      <circle cx="98" cy="128" r="1.8" fill="#fff"/>
+      <circle cx="286" cy="70" r="22" fill="#7FD5F2"/>
+      <ellipse cx="286" cy="70" rx="40" ry="9" fill="none" stroke="#B9EEFF" stroke-width="3" opacity=".75"/>`,
+    house:`<ellipse cx="110" cy="62" rx="38" ry="16" fill="#fff" opacity=".9"/>
+      <ellipse cx="144" cy="56" rx="26" ry="13" fill="#fff" opacity=".9"/>`,
+    forest:`<ellipse cx="92" cy="58" rx="40" ry="16" fill="#fff" opacity=".9"/>
+      <ellipse cx="296" cy="88" rx="32" ry="13" fill="#fff" opacity=".8"/>`,
+    kitchen:`<rect x="122" y="0" width="4" height="54" fill="#23252E"/>
+      <path d="M100 54 h48 l-9 22 h-30 z" fill="#FFD84D" stroke="#23252E" stroke-width="3"/>
+      <circle cx="124" cy="82" r="9" fill="#FFE9A8" opacity=".55"/>
+      <rect x="298" y="0" width="4" height="70" fill="#23252E"/>
+      <path d="M276 70 h48 l-9 22 h-30 z" fill="#FFC93C" stroke="#23252E" stroke-width="3"/>`,
+    city:`<circle cx="70" cy="46" r="18" fill="#FFD84D" opacity=".9"/>
+      <ellipse cx="220" cy="60" rx="42" ry="16" fill="#fff" opacity=".9"/>
+      <ellipse cx="258" cy="54" rx="26" ry="13" fill="#fff" opacity=".9"/>`,
+    school:`<ellipse cx="86" cy="54" rx="38" ry="16" fill="#fff" opacity=".9"/>
+      <ellipse cx="122" cy="48" rx="26" ry="13" fill="#fff" opacity=".9"/>
+      <ellipse cx="308" cy="86" rx="30" ry="13" fill="#fff" opacity=".8"/>`,
+    rain:`<ellipse cx="86" cy="50" rx="44" ry="20" fill="#8FA6B8"/>
+      <ellipse cx="132" cy="40" rx="30" ry="16" fill="#8FA6B8"/>
+      <ellipse cx="290" cy="72" rx="40" ry="18" fill="#9FB4C6"/>`
+  };
+  const art = bg[id] || bg.meadow;
+  return '<svg class="art" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
+    + '<rect width="400" height="400" fill="' + (SKY[id] || SKY.meadow) + '"/>'
+    + (DECO[id] || '')
+    + '<g transform="translate(0,160)">' + art + '</g>'
+    + '</svg>';
+}
+
+/* ---------------- 文本处理 ---------------- */
+function normalizeText(raw){
+  return String(raw||'')
+    .replace(/\r\n?/g,'\n')
+    .replace(/\u00a0/g,' ')
+    .replace(/[ \t]+/g,' ')
+    .replace(/\n{2,}/g,'\n');
+}
+function toSentences(raw){
+  let t = normalizeText(raw).replace(/\n/g,' . ');
+  t = t.replace(/([.!?;。！？；])\s*/g, '$1\u0001');
+  return t.split('\u0001')
+    .map(s => s.trim().replace(/\s*\.\s*$/,'.').replace(/^\s*[-•*·]\s*/,''))
+    .filter(s => /[A-Za-z]{2,}|[\u4e00-\u9fa5]{2,}/.test(s))
+    .map(s => s.replace(/\s+/g,' '));
+}
+const wc = s => (s.match(/[A-Za-z']+/g)||[]).length;
+
+function shorten(s){
+  let w = s.replace(/[.!?]+$/,'').trim().split(/\s+/);
+  if(w.length <= 15) return s;
+  let cut = 15;
+  for(let i=14;i>=8;i--){
+    const t = w[i-1].toLowerCase().replace(/[^a-z]/g,'');
+    if(/[,;:]$/.test(w[i-1]) || ['and','but','because','so','when','then','which','that','while'].includes(t)){ cut = i; break; }
+  }
+  let out = w.slice(0,cut).join(' ').replace(/[,;:]$/,'');
+  out = out.charAt(0).toUpperCase() + out.slice(1);
+  return out + '…';
+}
+
+function scoreSentence(s){
+  const n = wc(s);
+  let sc = 0;
+  if(n >= 5 && n <= 14) sc += 6;
+  else if(n < 5) sc -= 4;
+  else if(n > 20) sc -= 3;
+  const content = (s.toLowerCase().match(/[a-z']{4,}/g)||[]).filter(w=>!STOP.has(w)).length;
+  sc += Math.min(content,6);
+  if(/\p{Extended_Pictographic}/u.test(s)) sc += 1;
+  if(/["“”]/.test(s)) sc += 1;
+  return sc;
+}
+
+function pickKeyword(sentence, globalFreq, used){
+  const words = (sentence.toLowerCase().match(/[a-z']{3,}/g)||[]).filter(w => !STOP.has(w) && w.length>2);
+  if(!words.length) return '';
+  const uniq = [...new Set(words)];
+  uniq.sort((a,b) => (globalFreq[b]||0) - (globalFreq[a]||0) || b.length - a.length);
+  for(const w of uniq){ if(!used.has(w)) { used.add(w); return w; } }
+  return uniq[0];
+}
+
+function detectScene(text){
+  for(const [re, id] of TOPIC_SCENE){ if(re.test(text)) return id; }
+  return 'meadow';
+}
+
+function pickEmojis(sentence, kw, scene){
+  const s = sentence.toLowerCase();
+  const hits = [];
+  for(const w of Object.keys(WORD_EMOJI)){
+    if(new RegExp('\\b'+w+'\\b').test(s) && !hits.includes(WORD_EMOJI[w])) hits.push(WORD_EMOJI[w]);
+    if(hits.length >= 3) break;
+  }
+  if(kw && WORD_EMOJI[kw] && !hits.includes(WORD_EMOJI[kw])) hits.unshift(WORD_EMOJI[kw]);
+  if(hits.length < 2) (FALLBACK_EMOJI[scene]||FALLBACK_EMOJI.meadow).forEach(e=>{ if(!hits.includes(e)) hits.push(e); });
+  return hits.slice(0, Math.random() < .35 ? 3 : 2);
+}
+
+/* 从文本生成卡片组 */
+function buildCards(raw){
+  let sents = toSentences(raw);
+  // 太短的行合并
+  const merged = [];
+  sents.forEach(s => {
+    if(merged.length && wc(s) < 3){ merged[merged.length-1] += ' ' + s; }
+    else merged.push(s);
+  });
+  sents = merged.filter(s => wc(s) >= 3 || /[\u4e00-\u9fa5]{6,}/.test(s));
+  if(!sents.length) return [];
+
+  const freq = {};
+  (raw.toLowerCase().match(/[a-z']{3,}/g)||[]).forEach(w => { if(!STOP.has(w)) freq[w] = (freq[w]||0)+1; });
+
+  const want = clamp(Math.round(sents.length * 0.7), 4, 10);
+  const ranked = sents.map((s,i)=>({s,i,sc:scoreSentence(s)}))
+                      .sort((a,b)=> b.sc - a.sc)
+                      .slice(0, want)
+                      .sort((a,b)=> a.i - b.i);
+
+  const used = new Set();
+  const firstText = ranked.map(r=>r.s).join(' ');
+  return ranked.map((r, idx) => {
+    const sentence = shorten(r.s);
+    const kw = pickKeyword(sentence, freq, used);
+    const scene = detectScene(sentence + ' ' + firstText);
+    return {
+      s: sentence,
+      kw: kw,
+      cn: '',
+      scene: scene,
+      emojis: pickEmojis(sentence, kw, scene),
+      rot: (idx % 2 === 0 ? -1 : 1) * (0.6 + Math.random()*0.8)
+    };
+  });
+}
+
+/* 高亮关键词 */
+function markSentence(s, kw){
+  const safe = esc(s);
+  if(!kw) return safe;
+  const re = new RegExp('\\b(' + kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')\\b', 'i');
+  return safe.replace(re, '<mark>$1</mark>');
+}
+
+/* ---------------- 内置样例 ---------------- */
+const SAMPLES = [
+  {
+    id:'pigs', title:'The Three Little Pigs', zh:'三只小猪', cover:'🐷', bg:'#FFE0D6', level:'L1 入门', min:'1 分钟',
+    cards:[
+      {s:'Three little pigs build their own houses.', kw:'build', cn:'三只小猪各自盖起了房子。', scene:'meadow', emojis:['🐷','🐷','🐷']},
+      {s:'The first pig makes a house of straw.', kw:'straw', cn:'第一只小猪盖了一座草房子。', scene:'meadow', emojis:['🐷','🌾']},
+      {s:'The second pig makes a house of wood.', kw:'wood', cn:'第二只小猪盖了一座木头房子。', scene:'forest', emojis:['🐷','🪵']},
+      {s:'The wolf blows the straw house down!', kw:'blows', cn:'大灰狼一口气吹倒了草房子！', scene:'rain', emojis:['🐺','💨']},
+      {s:'The brick house is strong and safe.', kw:'brick', cn:'砖头房子又结实又安全。', scene:'house', emojis:['🧱','🏠']},
+      {s:'The three pigs laugh and dance together.', kw:'laugh', cn:'三只小猪一起又笑又跳。', scene:'meadow', emojis:['🐷','😆','🐷']}
+    ]
+  },
+  {
+    id:'morning', title:'My Morning', zh:'我的早晨', cover:'🌞', bg:'#FFF0C9', level:'L1 入门', min:'1 分钟',
+    cards:[
+      {s:'I wake up at seven o\u2019clock.', kw:'wake', cn:'我七点起床。', scene:'kitchen', emojis:['⏰','🌞']},
+      {s:'I brush my teeth and wash my face.', kw:'brush', cn:'我刷牙，也洗脸。', scene:'kitchen', emojis:['🪥','🧼']},
+      {s:'For breakfast I eat bread and milk.', kw:'breakfast', cn:'早餐我吃面包、喝牛奶。', scene:'kitchen', emojis:['🍞','🥛']},
+      {s:'I put on my shoes and carry my bag.', kw:'shoes', cn:'我穿好鞋，背上书包。', scene:'house', emojis:['👟','🎒']},
+      {s:'I say goodbye and run to school.', kw:'school', cn:'我说再见，然后跑向学校。', scene:'school', emojis:['🏫','🏃']}
+    ]
+  },
+  {
+    id:'space', title:'The Solar System', zh:'太阳系', cover:'🪐', bg:'#E3E6FF', level:'L2 进阶', min:'2 分钟',
+    cards:[
+      {s:'The Sun is a big, hot star.', kw:'Sun', cn:'太阳是一颗又大又热的恒星。', scene:'space', emojis:['☀️','🔥']},
+      {s:'Eight planets travel around the Sun.', kw:'planets', cn:'八颗行星绕着太阳转。', scene:'space', emojis:['🪐','🌍']},
+      {s:'Earth is our home. It has blue water.', kw:'Earth', cn:'地球是我们的家，上面有蓝色的水。', scene:'sea', emojis:['🌍','💧']},
+      {s:'The Moon goes around the Earth.', kw:'Moon', cn:'月亮绕着地球转。', scene:'night', emojis:['🌙','🌍']},
+      {s:'Mars is red and very cold.', kw:'Mars', cn:'火星是红色的，而且非常冷。', scene:'space', emojis:['🔴','🧊']},
+      {s:'Stars shine in the dark sky.', kw:'shine', cn:'星星在夜空中发亮。', scene:'night', emojis:['✨','🌟']}
+    ]
+  }
+];
+
+/* ---------------- 播放器 ---------------- */
+const S = { deck:null, i:0, t:0, playing:false, raf:0, last:0, speed:1, voice:true, dragging:false, from:'home' };
+
+function durOf(i){
+  const c = S.deck.cards[i];
+  const base = 3.4 + Math.min(3.4, c.s.length * 0.032);
+  return base / S.speed;
+}
+function totalDur(){
+  let sum = 0;
+  for(let k=0;k<S.deck.cards.length;k++) sum += durOf(k);
+  return sum;
+}
+function elapsed(){
+  let sum = 0;
+  for(let k=0;k<S.i;k++) sum += durOf(k);
+  return sum + Math.min(S.t, durOf(S.i));
+}
+function fmt(sec){
+  sec = Math.max(0, Math.round(sec));
+  return Math.floor(sec/60) + ':' + String(sec%60).padStart(2,'0');
+}
+
+function cardHTML(c, i){
+  const rot = c.rot != null ? c.rot : (i%2? .8 : -.8);
+  return '<article class="card" data-i="'+i+'" style="--rot:'+rot+'deg">'
+    + sceneSVG(c.scene)
+    + '<div class="actors">' + c.emojis.map(e=>'<span>'+e+'</span>').join('') + '</div>'
+    + '<div class="card-no">' + String(i+1).padStart(2,'0') + '</div>'
+    + '<div class="bubble">'
+      + '<p>' + markSentence(c.s, c.kw) + '</p>'
+      + (c.cn ? '<div class="cn">'+esc(c.cn)+'</div>' : '')
+      + (c.kw ? '<span class="kw">🔊 <b>'+esc(c.kw)+'</b></span>' : '')
+    + '</div>'
+  + '</article>';
+}
+
+function renderDeck(deck){
+  S.deck = deck; S.i = 0; S.t = 0; S.playing = false;
+  const inner = $('#stageInner');
+  inner.querySelectorAll('.card').forEach(n=>n.remove());
+  $('#finish').classList.remove('on');
+  inner.insertAdjacentHTML('beforeend', deck.cards.map(cardHTML).join(''));
+  $('#learnTitle').textContent = deck.title;
+  $('#learnSub').textContent = deck.cards.length + ' 张卡片 · ' + (deck.source && deck.source.label ? deck.source.label : '内置样例');
+  $('#finishTxt').textContent = '这 ' + deck.cards.length + ' 张卡片都看完啦，要不要再来一遍？';
+  $('#learnCount').textContent = '1 / ' + deck.cards.length;
+  sizeStage();
+  showCard(true);
+  updateScrub();
+  setPlay(false);
+}
+
+/* 卡片自适应尺寸：始终完整落在可视区内 */
+function sizeStage(){
+  const stage = document.querySelector('.stage');
+  const inner = $('#stageInner');
+  if(!stage || !inner) return;
+  const wide = window.innerWidth >= 900;
+  const ratio = wide ? 4/3 : 2/3;
+  const maxW = wide ? 620 : 430;
+  const availW = Math.min(stage.clientWidth || maxW, maxW);
+  const availH = stage.clientHeight;
+  let w = availW;
+  if(availH > 0) w = Math.min(w, availH * ratio);
+  w = Math.max(240, Math.floor(w));
+  inner.style.width = w + 'px';
+  inner.style.height = Math.round(w / ratio) + 'px';
+}
+
+function showCard(speakIt){
+  const cards = $('#stageInner').querySelectorAll('.card');
+  cards.forEach((n, k) => {
+    n.classList.toggle('on', k === S.i);
+    if(k === S.i) n.style.setProperty('--rot', (k%2? .8 : -.8)+'deg');
+  });
+  $('#learnCount').textContent = (S.i+1) + ' / ' + S.deck.cards.length;
+  if(speakIt !== false) speak(S.deck.cards[S.i].s);
+}
+
+function speak(text){
+  if(!S.voice || !window.speechSynthesis) return;
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/…/g,'.'));
+    u.lang = 'en-US'; u.rate = 0.88; u.pitch = 1.06;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function updateScrub(){
+  const p = clamp(elapsed() / totalDur(), 0, 1);
+  const pct = (p*100).toFixed(2) + '%';
+  $('#scrubFill').style.width = pct;
+  $('#scrubKnob').style.left = pct;
+  $('#timeline').textContent = fmt(elapsed()) + ' / ' + fmt(totalDur());
+}
+
+function loop(ts){
+  if(!S.playing) return;
+  if(!S.last) S.last = ts;
+  const dt = Math.min(0.12, (ts - S.last)/1000);
+  S.last = ts;
+  S.t += dt;
+  const d = durOf(S.i);
+  if(S.t >= d){
+    if(S.i < S.deck.cards.length - 1){
+      S.i++; S.t = 0; showCard(true);
+    }else{
+      S.t = d; updateScrub(); finish(); return;
+    }
+  }
+  updateScrub();
+  S.raf = requestAnimationFrame(loop);
+}
+
+function setPlay(on){
+  S.playing = on;
+  $('#btnPlay').textContent = on ? '❚❚' : '▶';
+  cancelAnimationFrame(S.raf);
+  S.last = 0;
+  if(on){
+    if($('#finish').classList.contains('on')){ restart(); return; }
+    if(S.t >= durOf(S.i) && S.i === S.deck.cards.length-1){ restart(); return; }
+    S.raf = requestAnimationFrame(loop);
+  }else{
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+}
+
+function finish(){
+  setPlay(false);
+  $('#finish').classList.add('on');
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+}
+
+function restart(){
+  $('#finish').classList.remove('on');
+  S.i = 0; S.t = 0;
+  showCard(true); updateScrub();
+  setPlay(true);
+}
+
+function goto(i, play){
+  i = clamp(i, 0, S.deck.cards.length - 1);
+  const changed = i !== S.i;
+  S.i = i; S.t = 0;
+  $('#finish').classList.remove('on');
+  if(changed) showCard(true);
+  updateScrub();
+  if(play && !S.playing) setPlay(true);
+}
+
+function seekTo(frac){
+  const total = totalDur();
+  let target = clamp(frac,0,1) * total;
+  for(let k=0;k<S.deck.cards.length;k++){
+    const d = durOf(k);
+    if(target <= d || k === S.deck.cards.length-1){
+      const changed = k !== S.i;
+      S.i = k; S.t = Math.min(target, d);
+      if(changed) showCard(true);
+      updateScrub();
+      return;
+    }
+    target -= d;
+  }
+}
+
+/* ---------------- 记录 ---------------- */
+function loadRecords(){
+  try{ return JSON.parse(localStorage.getItem(KEY) || '[]'); }catch(e){ return []; }
+}
+function pushRecord(deck){
+  let arr = loadRecords();
+  arr = arr.filter(r => r.id !== deck.id);
+  arr.unshift({
+    id: deck.id, title: deck.title, cover: deck.cover,
+    type: deck.source.type, label: deck.source.label,
+    count: deck.cards.length, createdAt: deck.createdAt, cards: deck.cards
+  });
+  try{ localStorage.setItem(KEY, JSON.stringify(arr.slice(0, 30))); }catch(e){}
+  renderRecords();
+}
+function timeAgo(ts){
+  const d = (Date.now() - ts) / 1000;
+  if(d < 60) return '刚刚';
+  if(d < 3600) return Math.floor(d/60) + ' 分钟前';
+  if(d < 86400) return Math.floor(d/3600) + ' 小时前';
+  const dt = new Date(ts);
+  return (dt.getMonth()+1) + '月' + dt.getDate() + '日';
+}
+const TYPE_LABEL = { text:'文字', pdf:'PDF', img:'图片', url:'链接', sample:'样例' };
+
+function renderRecords(){
+  const arr = loadRecords();
+  const box = $('#recList');
+  $('#recSub').textContent = arr.length ? '共 ' + arr.length + ' 次生成，点一下继续看' : '还没有记录，回首页生成第一组卡片吧';
+  if(!arr.length){
+    box.innerHTML = '<div class="empty"><span class="e">🗂</span>这里还空着<br>去首页贴一段内容试试</div>';
+    return;
+  }
+  box.innerHTML = arr.map(r =>
+    '<button class="rec-item" data-rec="'+r.id+'">'
+      + '<div class="rec-emoji" style="background:'+(r.type==='sample'?'#FFF0C9':'#EAF2FF')+'">'+esc(r.cover||'📄')+'</div>'
+      + '<div class="rec-body"><h4>'+esc(r.title)+'</h4>'
+        + '<div class="m"><span>'+ (TYPE_LABEL[r.type]||'内容') +'</span><span>'+r.count+' 张</span><span>'+timeAgo(r.createdAt)+'</span></div>'
+      + '</div><span style="font-size:16px;color:#B9B3A4">›</span>'
+    + '</button>'
+  ).join('');
+}
+
+/* ---------------- 样例卡 ---------------- */
+function renderSamples(){
+  $('#sampleGrid').innerHTML = SAMPLES.map(s =>
+    '<button class="sample-card" data-sample="'+s.id+'">'
+      + '<div class="cover" style="background:'+s.bg+'">'+s.cover+'</div>'
+      + '<div class="sc-body"><h3>'+esc(s.title)+'</h3><div class="zh">'+s.zh+'</div>'
+        + '<div class="meta"><span class="tag">'+s.level+'</span><span class="tag">'+s.cards.length+' 张</span><span class="tag">'+s.min+'</span></div>'
+      + '</div>'
+    + '</button>'
+  ).join('');
+}
+
+/* ---------------- 视图切换 ---------------- */
+function switchTab(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $('#view-' + name).classList.add('active');
+  document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+  if(name === 'records') renderRecords();
+  window.scrollTo({top:0, behavior:'smooth'});
+  try{ history.replaceState(null,'', name === 'home' ? location.pathname : '#' + name); }catch(e){}
+}
+
+function openLearn(deck, from){
+  S.from = from || 'home';
+  renderDeck(deck);
+  $('#view-learn').classList.add('open');
+  document.body.classList.add('locked');
+  requestAnimationFrame(()=>{ sizeStage(); });
+  setTimeout(sizeStage, 120);
+  if(!deck.source || deck.source.type === 'sample'){
+    if(loadRecords().every(r => r.id !== deck.id)){
+      pushRecord(deck);
+    }
+  }
+  setTimeout(()=>{ setPlay(true); }, 780);
+}
+
+function closeLearn(){
+  setPlay(false);
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  $('#view-learn').classList.remove('open');
+  document.body.classList.remove('locked');
+  if(S.from === 'records') renderRecords();
+}
+
+/* ---------------- 生成流程 ---------------- */
+function showLoading(txt, sub){
+  $('#loadTxt').textContent = txt;
+  $('#loadSub').textContent = sub || '';
+  $('#loading').classList.add('on');
+}
+function hideLoading(){ $('#loading').classList.remove('on'); }
+
+function makeDeck(raw, meta){
+  const cards = buildCards(raw);
+  if(!cards.length) return null;
+  const first = (toSentences(raw)[0] || cards[0].s).replace(/[…\s]+$/,'').trim();
+  const title = first.length > 26 ? first.slice(0,26) + '…' : first;
+  return {
+    id: 'd' + Date.now().toString(36) + rnd(999).toString(36),
+    title: title,
+    cover: cards[0].emojis[0] || '📄',
+    createdAt: Date.now(),
+    source: meta,
+    cards: cards
+  };
+}
+
+function generateFromText(){
+  const raw = $('#srcText').value.trim();
+  if(raw.length < 12){ toast('再多写一点点吧，至少 12 个字'); $('#srcText').focus(); return; }
+  if(buildCards(raw).length === 0){ toast('没读懂这段内容，换一段试试？'); return; }
+  showLoading('正在读内容…', '分句 · 挑关键词 · 画卡片');
+  setTimeout(()=>{
+    const deck = makeDeck(raw, {type:'text', label:'粘贴的文字'});
+    hideLoading();
+    if(!deck){ toast('内容太少，没能做成卡片'); return; }
+    pushRecord(deck);
+    openLearn(deck, 'home');
+  }, 620);
+}
+
+/* PDF */
+function loadScript(src){
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = () => rej(new Error('load fail'));
+    document.head.appendChild(s);
+  });
+}
+async function ensurePdf(){
+  if(window.pdfjsLib) return window.pdfjsLib;
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+  if(!window.pdfjsLib) throw new Error('no lib');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  return window.pdfjsLib;
+}
+async function readPdf(file){
+  const lib = await ensurePdf();
+  const buf = await file.arrayBuffer();
+  const pdf = await lib.getDocument({data: buf}).promise;
+  let txt = '';
+  const pages = Math.min(pdf.numPages, 12);
+  for(let i=1;i<=pages;i++){
+    const page = await pdf.getPage(i);
+    const tc = await page.getTextContent();
+    txt += tc.items.map(it => it.str).join(' ') + '\n';
+  }
+  return txt;
+}
+
+/* 图片 OCR */
+async function ensureTesseract(){
+  if(window.Tesseract) return window.Tesseract;
+  await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js');
+  if(!window.Tesseract) throw new Error('no ocr');
+  return window.Tesseract;
+}
+function withTimeout(p, ms, msg){
+  return Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error(msg||'timeout')), ms))]);
+}
+
+/* 网页正文 */
+const PROXIES = [
+  u => 'https://r.jina.ai/' + u,
+  u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u)
+];
+async function readUrl(url){
+  for(const p of PROXIES){
+    try{
+      const r = await withTimeout(fetch(p(url)), 12000, 'timeout');
+      if(!r.ok) continue;
+      const t = await r.text();
+      if(t && t.length > 80) return t.replace(/!\[[^\]]*\]\([^)]*\)/g,'').replace(/\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/https?:\/\/\S+/g,'');
+    }catch(e){}
+  }
+  throw new Error('url fail');
+}
+
+/* ---------------- 事件绑定 ---------------- */
+document.querySelectorAll('[data-tab]').forEach(b => {
+  b.addEventListener('click', () => switchTab(b.dataset.tab));
+});
+
+$('#btnGen').addEventListener('click', generateFromText);
+
+$('#srcText').addEventListener('keydown', e => {
+  if((e.metaKey || e.ctrlKey) && e.key === 'Enter') generateFromText();
+});
+
+$('#sampleGrid').addEventListener('click', e => {
+  const btn = e.target.closest('[data-sample]');
+  if(!btn) return;
+  const s = SAMPLES.find(x => x.id === btn.dataset.sample);
+  if(!s) return;
+  const deck = {
+    id: 'sample-' + s.id,
+    title: s.title,
+    cover: s.cover,
+    createdAt: Date.now(),
+    source: {type:'sample', label:'内置样例 · ' + s.zh},
+    cards: s.cards.map((c,i) => Object.assign({}, c, {rot: (i%2? .8 : -.8)}))
+  };
+  pushRecord(deck);
+  openLearn(deck, 'home');
+});
+
+$('#recList').addEventListener('click', e => {
+  const btn = e.target.closest('[data-rec]');
+  if(!btn) return;
+  const rec = loadRecords().find(r => r.id === btn.dataset.rec);
+  if(!rec) return;
+  openLearn({
+    id: rec.id, title: rec.title, cover: rec.cover, createdAt: rec.createdAt,
+    source: {type: rec.type, label: TYPE_LABEL[rec.type] || '内容'},
+    cards: rec.cards
+  }, 'records');
+});
+
+/* 附件 */
+document.querySelectorAll('.chip[data-act]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const act = btn.dataset.act;
+    if(act === 'pdf') $('#filePdf').click();
+    if(act === 'img') $('#fileImg').click();
+    if(act === 'url'){ $('#modal').classList.add('on'); setTimeout(()=>$('#urlInput').focus(), 80); }
+  });
+});
+
+$('#filePdf').addEventListener('change', async e => {
+  const f = e.target.files[0]; if(!f) return;
+  e.target.value = '';
+  showLoading('正在解析 PDF…', f.name);
+  try{
+    const txt = await withTimeout(readPdf(f), 30000, 'timeout');
+    if(txt.replace(/\s/g,'').length < 40) throw new Error('empty');
+    const deck = makeDeck(txt, {type:'pdf', label:'PDF · ' + f.name.slice(0,18)});
+    hideLoading();
+    if(!deck){ toast('这份 PDF 里没找到合适的句子'); return; }
+    pushRecord(deck); openLearn(deck, 'home');
+  }catch(err){
+    hideLoading();
+    toast('PDF 读取失败，可能是扫描件或不支持的文件');
+  }
+});
+
+$('#fileImg').addEventListener('change', async e => {
+  const f = e.target.files[0]; if(!f) return;
+  e.target.value = '';
+  showLoading('正在识别图片文字…', '首次识别需要下载识别引擎，请稍候');
+  try{
+    const T = await withTimeout(ensureTesseract(), 20000, 'load');
+    const res = await withTimeout(T.recognize(f, 'eng'), 45000, 'ocr');
+    const txt = (res && res.data && res.data.text) || '';
+    if(txt.replace(/\s/g,'').length < 20) throw new Error('empty');
+    const deck = makeDeck(txt, {type:'img', label:'图片 · ' + f.name.slice(0,16)});
+    hideLoading();
+    if(!deck){ toast('图片里的文字不够做卡片'); return; }
+    pushRecord(deck); openLearn(deck, 'home');
+  }catch(err){
+    hideLoading();
+    toast('没认出图片里的文字，试试 PDF 或直接粘贴文字');
+  }
+});
+
+$('#modalCancel').addEventListener('click', () => $('#modal').classList.remove('on'));
+$('#modal').addEventListener('click', e => { if(e.target.id === 'modal') $('#modal').classList.remove('on'); });
+$('#modalOk').addEventListener('click', async () => {
+  let u = $('#urlInput').value.trim();
+  if(!u) { toast('先粘贴一个链接'); return; }
+  if(!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  $('#modal').classList.remove('on');
+  showLoading('正在读取网页…', u.slice(0,42));
+  try{
+    const txt = await readUrl(u);
+    const deck = makeDeck(txt, {type:'url', label:'链接 · ' + u.replace(/^https?:\/\//,'').slice(0,24)});
+    hideLoading();
+    if(!deck){ toast('这个网页没抓到可用文字'); return; }
+    pushRecord(deck); openLearn(deck, 'home');
+  }catch(err){
+    hideLoading();
+    toast('打不开这个网页，试试复制正文粘贴进来');
+  }
+});
+
+/* 播放控制 */
+$('#btnPlay').addEventListener('click', () => {
+  if($('#finish').classList.contains('on')){ restart(); return; }
+  setPlay(!S.playing);
+  if(S.playing) speak(S.deck.cards[S.i].s);
+});
+$('#btnPrev').addEventListener('click', () => goto(S.i - 1, false));
+$('#btnNext').addEventListener('click', () => goto(S.i + 1, false));
+$('#btnBack').addEventListener('click', closeLearn);
+$('#btnHome2').addEventListener('click', () => { closeLearn(); switchTab('home'); });
+$('#btnAgain').addEventListener('click', restart);
+$('#btnVoice').addEventListener('click', () => {
+  S.voice = !S.voice;
+  $('#btnVoice').classList.toggle('off', !S.voice);
+  $('#btnVoice').textContent = S.voice ? '🔊' : '🔇';
+  if(!S.voice && window.speechSynthesis) window.speechSynthesis.cancel();
+  else if(S.voice) speak(S.deck.cards[S.i].s);
+});
+const SPEEDS = [1, 1.25, 0.75];
+let spIdx = 0;
+$('#btnSpeed').addEventListener('click', () => {
+  spIdx = (spIdx + 1) % SPEEDS.length;
+  S.speed = SPEEDS[spIdx];
+  $('#btnSpeed').textContent = (S.speed === 1 ? '1' : S.speed) + '×';
+  const total = totalDur();
+  S.t = clamp(S.t * (SPEEDS[(spIdx+2)%3]/S.speed), 0, durOf(S.i));
+  updateScrub();
+});
+
+/* 进度条拖动 */
+(function(){
+  const bar = $('#scrub');
+  let rect = null;
+  const ratio = e => {
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    return clamp(x / rect.width, 0, 1);
+  };
+  const down = e => {
+    if(!S.deck) return;
+    e.preventDefault();
+    rect = bar.getBoundingClientRect();
+    S.dragging = true;
+    bar.classList.add('grab');
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
+    const wasPlaying = S.playing;
+    if(wasPlaying) setPlay(false);
+    S._resume = wasPlaying;
+    seekTo(ratio(e));
+  };
+  const move = e => {
+    if(!S.dragging) return;
+    e.preventDefault();
+    seekTo(ratio(e));
+  };
+  const up = () => {
+    if(!S.dragging) return;
+    S.dragging = false;
+    bar.classList.remove('grab');
+    if(S._resume) setPlay(true);
+  };
+  bar.addEventListener('mousedown', down);
+  window.addEventListener('mousemove', move, {passive:false});
+  window.addEventListener('mouseup', up);
+  bar.addEventListener('touchstart', down, {passive:false});
+  window.addEventListener('touchmove', move, {passive:false});
+  window.addEventListener('touchend', up);
+})();
+
+/* 键盘 */
+window.addEventListener('keydown', e => {
+  if(!$('#view-learn').classList.contains('open')) return;
+  if(e.key === 'Escape') closeLearn();
+  if(e.key === ' '){ e.preventDefault(); $('#btnPlay').click(); }
+  if(e.key === 'ArrowRight') goto(S.i + 1, false);
+  if(e.key === 'ArrowLeft') goto(S.i - 1, false);
+});
+
+/* 尺寸变化 */
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if($('#view-learn').classList.contains('open')) sizeStage();
+  }, 120);
+});
+window.addEventListener('orientationchange', () => setTimeout(sizeStage, 260));
+
+/* 初始化 */
+renderSamples();
+renderRecords();
+if(location.hash === '#records') switchTab('records');
+
+})();
+</script>
+</body>
+</html>
